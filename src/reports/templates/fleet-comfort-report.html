@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{documentTitle}}</title>
+    {{{styleTag}}}
+  </head>
+  <body>
+    <section class="page">
+      <header class="site-header">
+        <span>{{documentTitle}}</span>
+        <strong>Inspection report</strong>
+      </header>
+
+      <div class="hero {{#unless passed}}fail{{/unless}}">
+        <div class="hero-eyebrow">{{statusEyebrow}}</div>
+        <div class="hero-title">{{statusHeadline}}</div>
+        <p class="hero-subtitle">{{statusSubtitle}}</p>
+        <div class="hero-meta">
+          <span>Plate Number: {{vehicleNumber}}</span>
+          <span>Vehicle: {{vehicleSummary}}</span>
+          <span>Location: {{locationLine}}</span>
+          <span>Date: {{inspectionDateLabel}}</span>
+        </div>
+        <div class="hero-mark" aria-hidden="true">*</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">▮</span> Composite score</h2>
+        <div class="meter">
+          <div class="meter-score" {{{scoreMarkerStyleAttr}}}>
+            {{compositeScore}}%
+          </div>
+          <div class="meter-pass" {{{passMarkMarkerStyleAttr}}}></div>
+          <div class="meter-pass-label" {{{passMarkMarkerStyleAttr}}}>
+            Pass {{passMark}}%
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-label">Checks passed</div>
+            <div class="stat-value">{{checksPassed}}/{{checksTotal}}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Checks failed</div>
+            <div class="stat-value fail">{{checksFailed}}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Photos captured</div>
+            <div class="stat-value">{{photosCaptured}}/{{photosTotal}}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Pass mark</div>
+            <div class="stat-value">{{passMark}}%</div>
+          </div>
+        </div>
+
+        {{#if passed}}
+        <div class="congrats">
+          <div class="congrats-badge">🏆</div>
+          <div>
+            Congratulations! See you next quarter on your next inspection
+            appointment —
+            <strong>{{nextAppointmentLabel}}</strong>.
+          </div>
+        </div>
+        {{else}}
+        <div class="congrats fail-banner">
+          <div class="congrats-badge">!</div>
+          <div>
+            This vehicle is below the fleet pass mark. Schedule remedial work
+            before the next inspection appointment —
+            <strong>{{nextAppointmentLabel}}</strong>.
+          </div>
+        </div>
+        {{/if}}
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">▣</span> Vehicle particulars</h2>
+        <div class="card">
+          <div class="kv-grid">
+            {{#each vehicleParticulars}}
+            <div class="kv">
+              <div class="kv-label">{{label}}</div>
+              <div class="kv-value">{{value}}</div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+
+      <footer class="site-footer">{{footerBrand}}</footer>
+    </section>
+
+    <section class="page">
+      <header class="site-header">
+        <span>{{documentTitle}}</span>
+        <strong>Driver information</strong>
+      </header>
+
+      <div class="card">
+        <h2 class="section-title"><span class="icon">☺</span> Driver information</h2>
+        <div class="kv-grid">
+          <div class="kv">
+            <div class="kv-label">DRIVER'S NAME</div>
+            <div class="kv-value">{{driverName}}</div>
+          </div>
+          <div class="kv">
+            <div class="kv-label">PHONE NUMBER</div>
+            <div class="kv-value">{{phoneNumber}}</div>
+          </div>
+          <div class="kv wide">
+            <div class="kv-label">EMAIL ADDRESS</div>
+            <div class="kv-value">{{emailAddress}}</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="site-footer">{{footerBrand}}</footer>
+    </section>
+
+    <section class="page">
+      <header class="site-header">
+        <span>{{documentTitle}}</span>
+        <strong>Detailed results</strong>
+      </header>
+
+      <div class="card">
+        <h2 class="section-title"><span class="icon">✓</span> Detailed results</h2>
+        {{#each detailedGroups}}
+        <div class="check-group">
+          <h3>{{title}}</h3>
+          <div class="check-grid">
+            {{#each items}}
+            <div class="check-item">
+              <div class="check-item-label">{{label}}</div>
+              <div class="check-status">
+                <span class="dot {{#unless passed}}fail{{/unless}}"></span>
+                {{resultLabel}}
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+
+      <footer class="site-footer">{{footerBrand}}</footer>
+    </section>
+
+    <section class="page">
+      <header class="site-header">
+        <span>{{documentTitle}}</span>
+        <strong>Summary</strong>
+      </header>
+
+      <div class="card">
+        {{#if electronicsGroup}}
+        <div class="check-group">
+          <h3>{{electronicsGroup.title}}</h3>
+          <div class="check-grid">
+            {{#each electronicsGroup.items}}
+            <div class="check-item">
+              <div class="check-item-label">{{label}}</div>
+              <div class="check-status">
+                <span class="dot {{#unless passed}}fail{{/unless}}"></span>
+                {{resultLabel}}
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+        {{/if}}
+
+        <div class="check-group">
+          <h3>Summary grades</h3>
+          <div class="grade-grid">
+            {{#each grades}}
+            <div class="grade-item">
+              <div class="grade-item-label">{{label}}</div>
+              <div class="stat-value">{{value}}</div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+
+        <p class="officer">
+          Inspecting officer: <strong>{{officerName}}</strong> · Report generated
+          {{reportGeneratedLabel}}
+        </p>
+      </div>
+
+      <footer class="site-footer">{{footerBrand}}</footer>
+    </section>
+
+    <section class="page">
+      <header class="site-header">
+        <span>{{documentTitle}}</span>
+        <strong>Photo documentation</strong>
+      </header>
+
+      <div class="card">
+        <h2 class="section-title">
+          <span class="icon">▢</span> Photo documentation ({{photosCaptured}}/{{photosTotal}}
+          captured)
+        </h2>
+        <div class="photo-grid">
+          {{#each photos}}
+          <div class="photo-cell">
+            {{#if dataUrl}}
+            <div class="photo-frame">
+              <img src="{{{dataUrl}}}" alt="{{label}}" />
+            </div>
+            {{else}}
+            <div class="photo-frame missing">Not captured</div>
+            {{/if}}
+            <div class="photo-label">{{label}}</div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+
+      <footer class="site-footer">{{footerBrand}}</footer>
+    </section>
+  </body>
+</html>

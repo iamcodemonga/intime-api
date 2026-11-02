@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SystemPermission {
+  id          String   @id @default(uuid()) @db.Uuid
+  sn          Int
+  code        String   @unique
+  name        String
+  module      String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  rolePermissions RolePermission[]
+
+  @@map("system_permissions")
+}
+
+model SystemRole {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  systemRole  Boolean  @default(false) @map("system_role")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  rolePermissions RolePermission[]
+  memberships     MembershipRole[]
+
+  @@map("system_roles")
+}
+
+model InspectionCenter {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  slug         String   @unique
+  phoneNumber  String?  @map("phone_number")
+  verified     Boolean  @default(false)
+  address      String?
+  locationArea String?  @map("location_area")
+  zone         String?
+  state        String?
+  country      String   @default("Nigeria")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  memberships MembershipRole[]
+  inspections Inspection[]
+
+  @@map("inspection_centers")
+}
+
+model RolePermission {
+  id           String   @id @default(uuid()) @db.Uuid
+  roleId       String   @map("role_id") @db.Uuid
+  permissionId String   @map("permission_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  role       SystemRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission SystemPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model MembershipRole {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @map("profile_id") @db.Uuid
+  centerId  String?  @map("center_id") @db.Uuid
+  roleId    String   @map("role_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  profile Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  center  InspectionCenter? @relation(fields: [centerId], references: [id], onDelete: SetNull)
+  role    SystemRole        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@map("membership_roles")
+}
+
+model Profile {
+  id        String   @id @db.Uuid
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  memberships         MembershipRole[]
+  inspectionsCreated  Inspection[]
+
+  @@map("profiles")
+}
+
+enum InspectionStatus {
+  draft
+  completed
+
+  @@map("inspection_status")
+}
+
+model Inspection {
+  id             String           @id @default(uuid()) @db.Uuid
+  centerId       String           @map("center_id") @db.Uuid
+  createdById    String           @map("created_by_id") @db.Uuid
+  vehicleNumber  String           @map("vehicle_number")
+  mileageKm      Int              @map("mileage_km")
+  year           Int
+  make           String
+  model          String
+  exteriorColour String           @map("exterior_colour")
+  engineNumber   String           @map("engine_number")
+  chassisNumber  String           @map("chassis_number")
+  driverFirstName String          @map("driver_firstname")
+  driverLastName  String          @map("driver_lastname")
+  phoneNumber     String          @map("phone_number")
+  emailAddress    String          @map("email_address")
+  checks         Json
+  grades         Json
+  checksPassed   Int              @map("checks_passed")
+  checksFailed   Int              @map("checks_failed")
+  photosCaptured Int              @default(0) @map("photos_captured")
+  passMark       Int              @default(67) @map("pass_mark")
+  compositeScore    Int              @map("composite_score")
+  status            InspectionStatus @default(draft)
+  reportStoragePath String?          @map("report_storage_path")
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  center    InspectionCenter   @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  createdBy Profile            @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  photos    InspectionPhoto[]
+
+  @@index([centerId, createdAt(sort: Desc)])
+  @@map("inspections")
+}
+
+model InspectionPhoto {
+  id           String   @id @default(uuid()) @db.Uuid
+  inspectionId String   @map("inspection_id") @db.Uuid
+  slotKey      String   @map("slot_key")
+  storagePath  String   @map("storage_path")
+  mimeType     String   @map("mime_type")
+  byteSize     Int      @map("byte_size")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  inspection Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  @@unique([inspectionId, slotKey])
+  @@map("inspection_photos")
+}
